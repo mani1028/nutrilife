@@ -10,8 +10,10 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
         <!-- CSS -->
-        <link rel="stylesheet" href="../static/css/style1.css">
-         <link href="../static/css/style.css" rel="stylesheet">        
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style1.css') }}">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
         <!-- Boxicons CSS -->
         <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
        
@@ -240,9 +242,10 @@ const firebaseConfig = {
         <script>
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    firebase.auth().signOut();
+    window.location.href = "/dashboard";
   }
 });
+
 </script>
 
     </body>
