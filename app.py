@@ -10,7 +10,8 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from functools import wraps
 import json # New import for handling JSON from environment variables
-
+from dotenv import load_dotenv
+load_dotenv()
 # --- Flask App Setup ---
 # Set template and static folders relative to the current file
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'), static_folder=os.path.join(os.path.dirname(__file__), 'static'))
