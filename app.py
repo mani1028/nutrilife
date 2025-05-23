@@ -249,10 +249,10 @@ def profile():
 
 def get_nutrition_api(query):
     url = "https://nutrition-by-api-ninjas.p.rapidapi.com/v1/nutrition"
-    headers = {
-        "x-rapidapi-key": "edfe3870b0mshbe155f99bc15a7bp1fb5a7jsn3ee827c63613", # Consider moving this to an environment variable too!
-        "x-rapidapi-host": "nutrition-by-api-ninjas.p.rapidapi.com"
-    }
+  headers = {
+    "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
+    "x-rapidapi-host": os.getenv("RAPIDAPI_HOST")
+}
     try:
         response = requests.get(url, headers=headers, params={"query": query}, timeout=5)
         json_data = response.json()
