@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment & secret keys
+.env
+uploads/firebase-adminsdk.json
+
+# Log files
+logs/
+*.log
+
+# Deployment & platform configs
+vercel.json
+
+# Ignore system files
+.DS_Store
+Thumbs.db
