@@ -96,7 +96,9 @@ def logout():
 @firebase_token_required
 def image_upload():
     uid = g.user_id
+    print(f"User ID: {uid}")
     doc = db.collection('user_profiles').document(uid).get()
+    print(f"Document exists: {doc.exists}")
     if not doc.exists:
         return redirect('/profile')
     return render_template("image.html")
