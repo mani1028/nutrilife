@@ -25,43 +25,51 @@ links.forEach(link => {
     });
 });
 
-// Firebase login/signup logic
-document.querySelector(".login form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.querySelector(".login .input").value;
-    const password = document.querySelector(".login .password").value;
+// Firebase login logic
+const loginForm = document.querySelector(".login form");
+if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const email = document.querySelector(".login .input").value;
+        const password = document.querySelector(".login .password").value;
 
-    firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(userCredential => userCredential.user.getIdToken())
-        .then(idToken => {
-            document.cookie = `token=${idToken}; path=/`;
-            window.location.href = "/dashboard";
-        })
-        .catch(error => {
-            alert("Login error: " + error.message);
-        });
-});
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then(userCredential => userCredential.user.getIdToken())
+            .then(idToken => {
+                document.cookie = `token=${idToken}; path=/`;
+                window.location.href = "/dashboard";
+            })
+            .catch(error => {
+                alert("Login error: " + error.message);
+            });
+    });
+}
 
-document.querySelector(".signup form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.querySelector(".signup .input").value;
-    const password = document.querySelectorAll(".signup .password")[0].value;
-    const confirmPassword = document.querySelectorAll(".signup .password")[1].value;
+// Firebase signup logic
+const signupForm = document.querySelector(".signup form");
+if (signupForm) {
+    signupForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const email = document.querySelector(".signup .input").value;
+        const password = document.querySelectorAll(".signup .password")[0].value;
+        const confirmPassword = document.querySelectorAll(".signup .password")[1].value;
 
-    if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-    }
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
 
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(userCredential => {
-            alert("Signup successful!");
-            forms.classList.remove("show-signup");
-        })
-        .catch(error => {
-            alert("Signup error: " + error.message);
-        });
-});
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then(userCredential => {
+                alert("Signup successful!");
+                const forms = document.querySelector(".forms");
+                if (forms) forms.classList.remove("show-signup");
+            })
+            .catch(error => {
+                alert("Signup error: " + error.message);
+            });
+    });
+}
 
 function logoutUser() {
     firebase.auth().signOut().then(() => {
@@ -80,30 +88,32 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 // Profile update logic
-document.getElementById("updateProfile").addEventListener("click", async (event) => {
-    event.preventDefault(); // Prevents unintended form submission
+const updateProfileBtn = document.getElementById("updateProfile");
+if (updateProfileBtn) {
+    updateProfileBtn.addEventListener("click", async (event) => {
+        event.preventDefault();
 
-    const userId = firebase.auth().currentUser.uid;
-    const updatedData = {
-        name: document.getElementById("name").value,
-        age: document.getElementById("age").value,
-        weight: document.getElementById("weight").value,
-        height: document.getElementById("height").value,
-        gender: document.getElementById("gender").value,
-        activityLevel: document.getElementById("activityLevel").value
-    };
+        const userId = firebase.auth().currentUser.uid;
+        const updatedData = {
+            name: document.getElementById("name").value,
+            age: document.getElementById("age").value,
+            weight: document.getElementById("weight").value,
+            height: document.getElementById("height").value,
+            gender: document.getElementById("gender").value,
+            activityLevel: document.getElementById("activityLevel").value
+        };
 
-    try {
-        await firebase.firestore().collection("users").doc(userId).update(updatedData);
-        alert("Profile updated successfully!");
-        
-        // Redirect to profile.html after successful update
-        window.location.href = "profile.html";
-    } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("Failed to update profile.");
-    }
-});
+        try {
+            await firebase.firestore().collection("users").doc(userId).update(updatedData);
+            alert("Profile updated successfully!");
+            window.location.href = "profile.html";
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Failed to update profile.");
+        }
+    });
+}
+
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         firebase.firestore().collection("users").doc(user.uid).get()
