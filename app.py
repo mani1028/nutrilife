@@ -165,7 +165,6 @@ def contact():
 @app.route('/predict', methods=['POST'])
 @firebase_token_required
 def predict():
-    # Check if model was loaded successfully
     if model is None or nutrition_df.empty:
         return jsonify({"error": "Application resources (model/data) not loaded properly. Please check server logs."}), 500
 
@@ -175,42 +174,52 @@ def predict():
     try:
         if 'file' in request.files:
             file = request.files['file']
+
             upload_temp_dir = os.path.join(BASE_DIR, 'temp_uploads')
             os.makedirs(upload_temp_dir, exist_ok=True)
             filepath = os.path.join(upload_temp_dir, file.filename)
             file.save(filepath)
 
-    try:
-        import time, gc
-        start_time = time.time()
+            try:
+                import time
+                import gc
+                start_time = time.time()
 
-        img = image.load_img(filepath, target_size=(64, 64))
-        img_array = image.img_to_array(img)
-        img_array = np.expand_dims(img_array, axis=0)
+                img = image.load_img(filepath, target_size=(64, 64))
+                img_array = image.img_to_array(img)
+                img_array = np.expand_dims(img_array, axis=0)
 
-        prediction = model.predict(img_array, verbose=0)
-        predicted_index = int(np.argmax(prediction))
+                prediction = model.predict(img_array, verbose=0)
+                predicted_index = int(np.argmax(prediction))
 
-        print(f"⏱ Prediction took {time.time() - start_time:.2f} seconds")
+                print(f"⏱ Prediction took {time.time() - start_time:.2f} seconds")
 
-        labels = ['apple', 'banana', 'orange', 'pineapple', 'watermelon']
-        predicted_label = labels[predicted_index]
+                labels = ['apple', 'banana', 'orange', 'pineapple', 'watermelon']
+                predicted_label = labels[predicted_index]
 
-        nutrition_data = get_nutrition_api(predicted_label)
+                nutrition_data = get_nutrition_api(predicted_label)
 
-        del img_array  # free memory
-        gc.collect()
-    finally:
-        os.remove(filepath)
+                # optional memory cleanup
+                del img_array
+                gc.collect()
+
+            except Exception as e:
+                print("Prediction error:", e)
+                return jsonify({"error": f"Failed to process prediction: {e}"}), 500
+
+            finally:
+                # always clean up file
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+
         elif 'description' in request.form:
             description = request.form['description']
             predicted_label = match_description(description)
             nutrition_data = get_nutrition_csv(predicted_label)
 
     except Exception as e:
-        print("Prediction error:", e)
-        # Return an error to the user if prediction fails
-        return jsonify({"error": f"Failed to process prediction: {e}"}), 500
+        print("Error during request handling:", e)
+        return jsonify({"error": f"Unexpected error: {e}"}), 500
 
     return render_template("image.html", showcase=nutrition_data, showcase1=predicted_label)
 
