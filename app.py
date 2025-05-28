@@ -174,11 +174,11 @@ def predict():
 
     try:
         if 'file' in request.files:
-    file = request.files['file']
-    upload_temp_dir = os.path.join(BASE_DIR, 'temp_uploads')
-    os.makedirs(upload_temp_dir, exist_ok=True)
-    filepath = os.path.join(upload_temp_dir, file.filename)
-    file.save(filepath)
+            file = request.files['file']
+            upload_temp_dir = os.path.join(BASE_DIR, 'temp_uploads')
+            os.makedirs(upload_temp_dir, exist_ok=True)
+            filepath = os.path.join(upload_temp_dir, file.filename)
+            file.save(filepath)
 
     try:
         import time, gc
