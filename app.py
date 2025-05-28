@@ -11,6 +11,9 @@ from firebase_admin import credentials, auth, firestore
 from functools import wraps
 import json # New import for handling JSON from environment variables
 from dotenv import load_dotenv
+port = int(os.getenv("PORT", 5000))
+app.run(host="0.0.0.0", port=port)
+
 load_dotenv()
 # --- Flask App Setup ---
 # Set template and static folders relative to the current file
