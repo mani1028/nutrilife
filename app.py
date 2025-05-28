@@ -11,8 +11,6 @@ from firebase_admin import credentials, auth, firestore
 from functools import wraps
 import json # New import for handling JSON from environment variables
 from dotenv import load_dotenv
-port = int(os.getenv("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
 
 load_dotenv()
 # --- Flask App Setup ---
@@ -332,4 +330,5 @@ def match_description(description):
     return matches[0] if matches else description
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
