@@ -174,27 +174,34 @@ def predict():
 
     try:
         if 'file' in request.files:
-            file = request.files['file']
-            # Save uploaded files temporarily within the project's 'upload' directory
-            # Ensure 'upload' directory exists in your project's root or a suitable path
-            upload_temp_dir = os.path.join(BASE_DIR, 'temp_uploads') # A temporary dir for user uploads
-            os.makedirs(upload_temp_dir, exist_ok=True)
-            filepath = os.path.join(upload_temp_dir, file.filename)
-            file.save(filepath)
+    file = request.files['file']
+    upload_temp_dir = os.path.join(BASE_DIR, 'temp_uploads')
+    os.makedirs(upload_temp_dir, exist_ok=True)
+    filepath = os.path.join(upload_temp_dir, file.filename)
+    file.save(filepath)
 
-            img = image.load_img(filepath, target_size=(64, 64))
-            img_array = image.img_to_array(img)
-            img_array = np.expand_dims(img_array, axis=0)
+    try:
+        import time, gc
+        start_time = time.time()
 
-            prediction = np.argmax(model.predict(img_array), axis=1)
-            labels = ['apple', 'banana', 'orange', 'pineapple', 'watermelon'] # Define your labels
-            predicted_label = labels[prediction[0]]
+        img = image.load_img(filepath, target_size=(64, 64))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
 
-            nutrition_data = get_nutrition_api(predicted_label)
-            
-            # Clean up the uploaded file
-            os.remove(filepath)
+        prediction = model.predict(img_array, verbose=0)
+        predicted_index = int(np.argmax(prediction))
 
+        print(f"⏱ Prediction took {time.time() - start_time:.2f} seconds")
+
+        labels = ['apple', 'banana', 'orange', 'pineapple', 'watermelon']
+        predicted_label = labels[predicted_index]
+
+        nutrition_data = get_nutrition_api(predicted_label)
+
+        del img_array  # free memory
+        gc.collect()
+    finally:
+        os.remove(filepath)
         elif 'description' in request.form:
             description = request.form['description']
             predicted_label = match_description(description)
