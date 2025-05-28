@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session, g
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, g
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
