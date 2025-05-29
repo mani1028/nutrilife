@@ -148,7 +148,71 @@ def dashboard():
     elif caloric_balance < -200:
         tips.append("You’re under your caloric goal. Ensure you're eating enough for energy.")
 
-    return render_template("dashboard.html", profile=profile, user_name=profile['name'], nutrition=nutrition, caloric_balance=caloric_balance, tips=tips)
+    # 🆕 Long-term progress
+    progress = {
+        "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+        "calories": [2200, 2100, 2000, 1800]
+    }
+
+    # 🆕 Recipe suggestions
+    recipes = [
+        {"name": "Grilled Chicken Salad", "description": "High in protein and fiber", "link": "https://example.com/chicken-salad"},
+        {"name": "Quinoa Veg Bowl", "description": "Great for energy and nutrients", "link": "https://example.com/quinoa-bowl"}
+    ]
+
+    # 🆕 Challenges
+    challenges = [
+        {"name": "7-Day Hydration", "points": 50},
+        {"name": "Walk 10k Steps", "points": 30}
+    ]
+    # 🆕 Fetch leaderboard from all users
+    users = db.collection('user_profiles').stream()
+    leaderboard = []
+
+    for user_doc in users:
+        user_data = user_doc.to_dict()
+        if 'name' in user_data and 'score' in user_data:
+            leaderboard.append({
+                'name': user_data['name'],
+                'score': user_data['score']
+                 })
+
+# Sort by score descending
+    leaderboard.sort(key=lambda x: x['score'], reverse=True)
+
+    return render_template("dashboard.html", profile=profile, user_name=profile['name'], nutrition=nutrition,
+                           caloric_balance=caloric_balance, tips=tips, progress=progress,
+                           recipes=recipes, challenges=challenges, leaderboard=leaderboard)
+
+@app.route('/log-activity', methods=['POST'])
+@firebase_token_required
+def log_activity():
+    uid = g.user_id
+    activity = request.form.get("activity")
+    duration = request.form.get("duration")
+
+    try:
+        duration = int(duration)
+    except (ValueError, TypeError):
+        duration = 0
+
+    if duration > 0:
+        db.collection('user_profiles').document(uid).collection('activities').add({
+            "activity": activity,
+            "duration": duration,
+            "timestamp": firestore.SERVER_TIMESTAMP
+        })
+
+        # 🧠 Award score: 1 point per 10 minutes
+        additional_points = duration // 10
+        user_ref = db.collection('user_profiles').document(uid)
+        user_doc = user_ref.get()
+        if user_doc.exists:
+            current_score = user_doc.to_dict().get('score', 0)
+            user_ref.update({"score": current_score + additional_points})
+
+    return redirect("/dashboard")
+
 
 @app.route('/service')
 def service():
