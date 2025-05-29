@@ -93,7 +93,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    return redirect(url_for('login')) 
+    response = make_response(redirect(url_for('login')))
+    response.set_cookie('token', '', expires=0)  # Clear Firebase ID token cookie
+    return response
     
 @app.route('/image')
 @firebase_token_required
